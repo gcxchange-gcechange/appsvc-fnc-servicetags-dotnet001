@@ -48,23 +48,21 @@ namespace appsvc_fnc_servicetags_dotnet001
             }
             try
             {
-
-                using (WebClient web1 = new WebClient())
+                //download servicetags json
+                using (WebClient web = new WebClient())
                 {
-                    string data1 = web1.DownloadString("https://www.microsoft.com/en-us/download/confirmation.aspx?id=56519");
+                    string servicetagsLink = web.DownloadString("https://www.microsoft.com/en-us/download/confirmation.aspx?id=56519");
                     // Load
                     var doc = new HtmlDocument();
-                    doc.LoadHtml(data1);
+                    doc.LoadHtml(servicetagsLink);
 
                     // extracting all links
-                    var name1 = doc.DocumentNode.SelectSingleNode("//*[@id='c50ef285-c6ea-c240-3cc4-6c9d27067d6c']");
-                    HtmlAttribute att = name1.Attributes["href"];
+                    var downloadLink = doc.DocumentNode.SelectSingleNode("//*[@id='c50ef285-c6ea-c240-3cc4-6c9d27067d6c']");
+                    HtmlAttribute att = downloadLink.Attributes["href"];
 
                     using (var client = new WebClient())
                     {
                         client.DownloadFile(att.Value, Path.GetTempPath() + "\\servicetags.json");
-                        //client.DownloadFile(att.Value, "C:\\home\\site\\wwwroot\\servicetags.json");// test locally
-                        log.LogInformation(Path.GetTempPath());
                     }
                 }
             }
@@ -73,17 +71,25 @@ namespace appsvc_fnc_servicetags_dotnet001
                 log.LogInformation("Download Fail");
                 log.LogInformation(e.Message);
             }
-            //var sourceFile = File.ReadAllText("C:\\home\\site\\wwwroot\\servicetags.json");//test locally
             var sourceFile = File.ReadAllText(Path.GetTempPath() + "\\servicetags.json");
             var array = JsonConvert.DeserializeObject<ServiceTagsFile>(sourceFile);
             List<string> allTheSheets = new List<string>();
+
+            //List of service name that ip address are not part of final array
+           var ServicesRemove = new[] { "AzureBackup", "AzureBotService", "AzureCognitiveSearch", "AzureCosmosDB", "AzureDatabricks", "AzureDigitalTwins", "AzureIoTHub", "AzureSignalR", "AzurePlatformIMDS", "AzureDataLake", "AzureFrontDoor.Frontend", "AzureFrontDoor.Backend", "AzureFrontDoor.FirstParty", "CognitiveServicesManagement", "HDInsight" };
+             
             foreach (var value in array.values)
             {
-                if (value.properties.regionId == regionID) //Get ip from specific region
+                if (value.properties.regionId == regionID && ServicesRemove.Contains(value.properties.systemService) == false) //Get ip from specific region and service
                 {
+                    
                     foreach (var propertie in value.properties.addressPrefixes)
+                       
                     {
-                        allTheSheets.Add(propertie.ToString());
+                        if (propertie.Count(c => c == '.') == 3) // if ipv4
+                        {
+                           allTheSheets.Add(propertie.ToString());
+                        }
                     }
                 }
             }
@@ -103,7 +109,7 @@ namespace appsvc_fnc_servicetags_dotnet001
                     canadacentral = q
                 };
 
-                return new OkObjectResult(ipAddress);
+             return new OkObjectResult(ipAddress);
         }
     }
 
