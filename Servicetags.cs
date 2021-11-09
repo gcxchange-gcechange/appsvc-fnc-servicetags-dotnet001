@@ -76,7 +76,7 @@ namespace appsvc_fnc_servicetags_dotnet001
             List<string> allTheSheets = new List<string>();
 
             //List of service name that ip address are not part of final array
-           var ServicesRemove = new[] { "AzureBackup", "AzureBotService", "AzureCognitiveSearch", "AzureCosmosDB", "AzureDatabricks", "AzureDigitalTwins", "AzureIoTHub", "AzureSignalR", "AzurePlatformIMDS", "AzureDataLake", "AzureFrontDoor.Frontend", "AzureFrontDoor.Backend", "AzureFrontDoor.FirstParty", "CognitiveServicesManagement", "HDInsight" };
+           var ServicesRemove = new[] { "AzureBackup", "AzureBotService", "AzureCognitiveSearch", "AzureCosmosDB", "AzureDatabricks", "AzureDigitalTwins", "AzureIoTHub", "AzureSignalR", "AzurePlatformIMDS", "AzureDataLake", "AzureFrontDoor.Frontend", "AzureFrontDoor.Backend", "AzureFrontDoor.FirstParty", "CognitiveServicesManagement", "HDInsight", "AzureEventGrid" };
              
             foreach (var value in array.values)
             {
